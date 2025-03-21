@@ -1,9 +1,7 @@
-
-
 #include <SFML/Graphics.hpp> 
+#include <SFML/Audio.hpp>
 #include <bits/stdc++.h>    
 #include <chrono>
-#include <mutex>
 using namespace std; 
 
 
@@ -12,27 +10,31 @@ enum class CollisionDirection {
 };
 
 
-void killing(sf::RenderWindow &gygamewindow,sf::Sprite &player,sf::Sprite &map,float &x,float &y,double &xSpeed,double &ySpeed); //É±ï¿½ï¿½ï¿½ï¿½ï¿?
+void killing(sf::RenderWindow &gygamewindow,sf::Sprite &player,sf::Sprite &map,float &x,float &y,double &xSpeed,double &ySpeed);
 bool canrungame();
-bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads = 4);
-set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads = 4);
+bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads);
+set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads);
 
 int main()
 {
+    sf::Music gamemusic;
     int level=0; 
     float x=0,y=0; 
     double xSpeed = 0,ySpeed = 0;
     bool end=false,canjump=true;
     system("color 2");
-    cout<<"________________________________________________________________________________________________________________________\nï¿½ï¿½Ï·ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿ï¿½\tï¿½ï¿½Ï·ï¿½ï¿½ï¿½æ£ºSFML\tï¿½ï¿½ï¿½ï¿½æ±¾ï¿½ï¿?2.5.1\tï¿½ï¿½Ï·ï¿½æ±¾ï¿½ï¿½0.0(beta)\nï¿½ï¿½ï¿½ß£ï¿½ï¿½Ï¹ï¿½ï¿½ï¿½Ðªï¿½ï¿½ï¿½ï¿½bilibili:ï¿½Ï¹ï¿½ï¿½ï¿½Ðªï¿½ï¿½-ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Github:GY-GZWï¿½ï¿½\tï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½ï¿½Ô°ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½https://gy-gzw.github.io/ï¿½ï¿½\nï¿½ï¿½Ã£ï¿½ï¿½ï¿½Ò£ï¿½ï¿½ï¿½Ó­ï¿½ï¿½ï¿½æ±¾ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½BUGï¿½Þ¸ï¿½ï¿½ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½BUGï¿½ï¿½ï¿½á½»ï¿½ï¿½GitHub\nï¿½ï¿½ï¿½ï¿½ï¿½×?ï¿½â£ºï¿½ï¿½ï¿½ï¿½Ï·ÎªMITï¿½ï¿½Ô´Ð­ï¿½é£¬ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½Ð­ï¿½é£¬×£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n________________________________________________________________________________________________________________________\nï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½Ôºï¿?:\n";
+    cout<<"________________________________________________________________________________________________________________________\nÓÎÏ·Ãû³Æ£º¹¢µÂì­ÅÜ¿á\tÓÎÏ·ÒýÇæ£ºSFML\tÒýÇæ°æ±¾£º2.5.1\tÓÎÏ·°æ±¾£º0.0(beta)\n×÷Õß£ºÉÏ¹ÅÃ×Ðª¶û£¨bilibili:ÉÏ¹ÅÃ×Ðª¶û-¹ûÔ°¹¤×÷ÊÒ,Github:GY-GZW£©\tËùÊô¹¤×÷ÊÒ£º¹ûÔ°¹¤×÷ÊÒ£¨¹ÙÍø£ºhttps://gy-gzw.github.io/£©\nÄãºÃ£¬Íæ¼Ò£¬»¶Ó­ÓÎÍæ±¾ÓÎÏ·£¬×÷ÕßÊÇÒ»¸ö³õÖÐÉú£¬BUGÐÞ¸´¿ÉÄÜ½ÏÂý£¬ÇëÄúÁÂ½â£¬ÈçÓöµ½ÈÎºÎBUGÇëÌá½»µ½GitHub\n×îºó£¬Çë×¢Òâ£º±¾ÓÎÏ·ÎªMIT¿ªÔ´Ð­Òé£¬ÇëÑÏ¸ñ×ñÊØÐ­Òé£¬×£ÄúÓÎÍæÓä¿ì\n________________________________________________________________________________________________________________________\nÕýÔÚ¼ì²éÓÎÏ·×ÊÔ´ÍêÕûÐÔ£¬ÇëÉÔºó:\n";
     if(!canrungame()){
         cout<<"ÓÎÏ·×ÊÔ´È±Ê§£¬Çë¼ì²éÒÔÉÏÌáµ½µÄÈ±Ê§ÎÄ¼þ\n";
         cout<<"°´ÈÎÒâ¼üÍË³öÓÎÏ·...";
         system("pause>nul");
         return -3;
     }else{
-        cout<<"ï¿½ï¿½Ï·ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n________________________________________________________________________________________________________________________\nï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï?(y/n):";
+        cout<<"ÓÎÏ·×ÊÔ´ÍêÕû,¿ÉÒÔÆô¶¯\n________________________________________________________________________________________________________________________\nï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï?(y/n):";
     }
+    gamemusic.openFromFile("wav/start.wav");
+    gamemusic.setLoop(true);
+    gamemusic.play();
     string* a = new string;
     cin>>*a;
     if(!(*a=="y"||*a=="Y"||*a=="yes"||*a=="Yes"||*a=="YES")){
@@ -58,6 +60,9 @@ int main()
     gygamewindow.display();
     this_thread::sleep_for(chrono::seconds(5));
     mapicon.loadFromFile("icon/level_"+to_string(level)+".png");
+    gamemusic.stop();
+    gamemusic.openFromFile("wav/game.wav");
+    gamemusic.play();
     while (gygamewindow.isOpen()) {
 
         sf::Event event;
@@ -177,7 +182,7 @@ int main()
     }
     if(end) {
         gygamewindow.close();
-        cout<<"ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Ø¹ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿á£?Î´ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?;\n";
+        cout<<"¹§Ï²ÄãÒÑÍ¨¹Ø±¾ÓÎÏ·£¬Î´À´¿ÉÄÜ»á³öÐø×÷£¬¾´ÇëÆÚ´ý\n";
     }
     cout<<"°´ÈÎÒâ¼üÍË³öÓÎÏ·...";
     system("pause>nul");
@@ -201,106 +206,120 @@ void killing(sf::RenderWindow &gygamewindow,sf::Sprite &player,sf::Sprite &map,f
 
 bool canrungame(){
     sf::Texture mapicon;
+    sf::Music music;
     bool canrun=true;
     if (!mapicon.loadFromFile("icon/SFML.png")) {
-        cout<<"icon/SFML.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/SFML.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/SFML.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/SFML.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/player_left.png")) {
-        cout<<"icon/player_left.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/player_left.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/player_left.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/player_left.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/player_right.png")) {
-        cout<<"icon/player_right.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/player_right.png×ÊÔ´È±Ê§\n";
     }else{
-        cout<<"icon/player_right.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/player_right.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/gy.png")) {
-        cout<<"icon/gy.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/gy.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/gy.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/gy.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_0.png")) {
-        cout<<"icon/level_0.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_0.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_0.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_0.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_1.png")) { 
-        cout<<"icon/level_1.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_1.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_1.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_1.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_2.png")) { 
-        cout<<"icon/level_2.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_2.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_2.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_2.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_3.png")) { 
-        cout<<"icon/level_3.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_3.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_3.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_3.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_4.png")) { 
-        cout<<"icon/level_4.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_4.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_4.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_4.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_5.png")) { 
-        cout<<"icon/level_5.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_5.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_5.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_5.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_6.png")) { 
-        cout<<"icon/level_6.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_6.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_6.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_6.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_7.png")) { 
-        cout<<"icon/level_7.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_7.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_7.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_7.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_8.png")) { 
-        cout<<"icon/level_8.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_8.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_8.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_8.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_9.png")) { 
-        cout<<"icon/level_9.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_9.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_9.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_9.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_10.png")) { 
-        cout<<"icon/level_10.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_10.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_10.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_10.png×ÊÔ´ÍêÕû\n";
     }
     if (!mapicon.loadFromFile("icon/level_11.png")) { 
-        cout<<"icon/level_11.pngï¿½ï¿½Ô´È±Ê§\n";
+        cout<<"icon/level_11.png×ÊÔ´È±Ê§\n";
         canrun=false;
     }else{
-        cout<<"icon/level_11.pngï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½\n";
+        cout<<"icon/level_11.png×ÊÔ´ÍêÕû\n";
+    }
+    if (!music.openFromFile("wav/start.wav")) {
+        cout<<"wav/start.wav×ÊÔ´È±Ê§\n";
+        canrun=false;
+    }else{
+        cout<<"wav/start.wav×ÊÔ´ÍêÕû\n";
+    }
+    if (!music.openFromFile("wav/game.wav")) {
+        cout<<"wav/game.wav×ÊÔ´È±Ê§\n";
+        canrun=false;
+    }
+    else{
+        cout<<"wav/game.wav×ÊÔ´ÍêÕû\n";
     }
     return canrun;
 }
 
-bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads = 4) {
+bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads) {
     sf::FloatRect bounds1 = sprite1.getGlobalBounds();
     sf::FloatRect bounds2 = sprite2.getGlobalBounds();
 
@@ -322,8 +341,8 @@ bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color
     int totalRows = static_cast<int>(bottom - top);
     int rowsPerThread = totalRows / numThreads;
 
-    vector<thread> threads;
-    mutex mutex;
+    std::vector<std::thread> threads;
+    std::mutex mutex;
     bool found = false;
 
     auto task = [&](int startRow, int endRow) {
@@ -343,7 +362,7 @@ bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color
                     sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x, localPos2.y);
 
                     if (pixelColor1 == targetColor || pixelColor2 == targetColor) {
-                        lock_guard<mutex> lock(mutex);
+                        std::lock_guard<std::mutex> lock(mutex);
                         found = true;
                         return;
                     }
@@ -365,8 +384,8 @@ bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color
     return found;
 }
 
-set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads = 4) {
-    set<CollisionDirection> directions;
+std::set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads) {
+    std::set<CollisionDirection> directions;
     sf::FloatRect bounds1 = sprite1.getGlobalBounds();
     sf::FloatRect bounds2 = sprite2.getGlobalBounds();
 
@@ -388,8 +407,8 @@ set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const
     int totalRows = static_cast<int>(bottom - top);
     int rowsPerThread = totalRows / numThreads;
 
-    vector<thread> threads;
-    mutex mutex;
+    std::vector<std::thread> threads;
+    std::mutex mutex;
     bool found = false;
 
     auto task = [&](int startRow, int endRow) {
@@ -409,7 +428,7 @@ set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const
                     sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x, localPos2.y);
 
                     if (pixelColor1 == targetColor || pixelColor2 == targetColor) {
-                        lock_guard<mutex> lock(mutex);
+                        std::lock_guard<std::mutex> lock(mutex);
                         if (!found) {
                             if (y + top < bounds1.top + bounds1.height / 2) {
                                 directions.insert(CollisionDirection::Top);
