@@ -1,7 +1,9 @@
-#include <SFML/Graphics.hpp> 
-#include <SFML/Audio.hpp>
-#include <bits/stdc++.h>    
-#include <chrono>
+//导入头文件
+#include <SFML/Graphics.hpp> //SFML图形库
+#include <SFML/Audio.hpp> //SFML音频库
+#include <bits/stdc++.h> //C++标准库
+
+//使用命名空间
 using namespace std; 
 
 
@@ -9,11 +11,11 @@ enum class CollisionDirection {
     None, Top, Bottom, Left, Right
 };
 
-
+//函数预定义
 void killing(sf::RenderWindow &gygamewindow,sf::Sprite &player,sf::Sprite &map,float &x,float &y,double &xSpeed,double &ySpeed);
 bool canrungame();
-bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads);
-set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads);
+bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor);
+set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor);
 
 int main()
 {
@@ -23,14 +25,14 @@ int main()
     double xSpeed = 0,ySpeed = 0;
     bool end=false,canjump=true;
     system("color 2");
-    cout<<"________________________________________________________________________________________________________________________\n游戏名称：耿德飙跑酷\t游戏引擎：SFML\t引擎版本：2.5.1\t游戏版本：0.0(beta)\n作者：上古米歇尔（bilibili:上古米歇尔-果园工作室,Github:GY-GZW）\t所属工作室：果园工作室（官网：https://gy-gzw.github.io/）\n你好，玩家，欢迎游玩本游戏，作者是一个初中生，BUG修复可能较慢，请您谅解，如遇到任何BUG请提交到GitHub\n最后，请注意：本游戏为MIT开源协议，请严格遵守协议，祝您游玩愉快\n________________________________________________________________________________________________________________________\n正在检查游戏资源完整性，请稍后:\n";
+    cout<<"________________________________________________________________________________________________________________________\n游戏名称：耿德飙跑酷\t游戏引擎：SFML\t引擎版本：2.5.1\t游戏版本：0.5(beta)\n作者：上古米歇尔（bilibili:上古米歇尔-果园工作室,Github:GY-GZW）\t所属工作室：果园工作室（官网：https://gy-gzw.github.io/）\n你好，玩家，欢迎游玩本游戏，作者是一个初中生，BUG修复可能较慢，请您谅解，如遇到任何BUG请提交到GitHub\n最后，请注意：本游戏为MIT开源协议，请严格遵守协议，祝您游玩愉快\n________________________________________________________________________________________________________________________\n正在检查游戏资源完整性，请稍后:\n";
     if(!canrungame()){
         cout<<"游戏资源缺失，请检查以上提到的缺失文件\n";
         cout<<"按任意键退出游戏...";
         system("pause>nul");
         return -3;
     }else{
-        cout<<"游戏资源完整,可以启动\n________________________________________________________________________________________________________________________\n锟角凤拷锟斤拷锟斤拷锟较?(y/n):";
+        cout<<"游戏资源完整,可以启动\n________________________________________________________________________________________________________________________\n是否进入游戏(y/n):";
     }
     gamemusic.openFromFile("wav/start.wav");
     gamemusic.setLoop(true);
@@ -63,6 +65,7 @@ int main()
     gamemusic.stop();
     gamemusic.openFromFile("wav/game.wav");
     gamemusic.play();
+    y=200;
     while (gygamewindow.isOpen()) {
 
         sf::Event event;
@@ -72,7 +75,7 @@ int main()
             }
         }
 
-        std::set<CollisionDirection> directions = checkCollisionDirection(player, map, sf::Color(255, 0, 0), 30);
+        std::set<CollisionDirection> directions = checkCollisionDirection(player, map, sf::Color(255, 0, 0));
         bool top = false, bottom = false, left = false, right = false;
         if (!directions.empty()) {
             for (const auto& direction : directions) {
@@ -92,11 +95,11 @@ int main()
                 };
             }
         }
-
+        //cout<<"isHit:"<<isHit(player, map,sf::Color(0,0,0))<<"top:"<<top<<"bottom:"<<bottom<<"left:"<<left<<"right:"<<right<<endl;//调试代码
         if(!bottom){
-            ySpeed+=1;
+            ySpeed+=5;
         }
-        if (isHit(player, map,sf::Color(255,0,0),10)) {
+        if (isHit(player, map,sf::Color(255,0,0))) {
             killing(gygamewindow, player, map,x, y, xSpeed, ySpeed);
         }else {
             if (top&left&right) {
@@ -157,7 +160,7 @@ int main()
             level++;
             mapicon.loadFromFile("icon/level_"+to_string(level)+".png");
             x=0;
-            y=0;
+            y=200;
         }
         if(x>790&&level==11){
             end=true;
@@ -186,6 +189,7 @@ int main()
     }
     cout<<"按任意键退出游戏...";
     system("pause>nul");
+    gamemusic.stop();
     return 0;
 }
 
@@ -319,7 +323,8 @@ bool canrungame(){
     return canrun;
 }
 
-bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads) {
+bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor) {
+    //return false;//调试
     sf::FloatRect bounds1 = sprite1.getGlobalBounds();
     sf::FloatRect bounds2 = sprite2.getGlobalBounds();
 
@@ -327,64 +332,34 @@ bool isHit(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color
         return false;
     }
 
-    const sf::Texture* texture1 = sprite1.getTexture();
     const sf::Texture* texture2 = sprite2.getTexture();
-    if (!texture1 || !texture2) {
+    if (!texture2) {
         return false;
     }
 
-    float left = bounds1.left;
-    float top = bounds1.top;
-    float right = bounds1.left + bounds1.width;
-    float bottom = bounds1.top + bounds1.height;
+    sf::FloatRect intersectRect = bounds1;
+    intersectRect.intersects(bounds2, intersectRect);
 
-    int totalRows = static_cast<int>(bottom - top);
-    int rowsPerThread = totalRows / numThreads;
+    for (float x = intersectRect.left; x < intersectRect.left + intersectRect.width; x += 1) {
+        for (float y = intersectRect.top; y < intersectRect.top + intersectRect.height; y += 1) {
+            sf::Vector2f globalPos(x, y);
+            sf::Vector2i localPos2 = static_cast<sf::Vector2i>(sprite2.getInverseTransform().transformPoint(globalPos));
 
-    std::vector<std::thread> threads;
-    std::mutex mutex;
-    bool found = false;
+            if (localPos2.x >= 0 && localPos2.y >= 0 && 
+                localPos2.x < texture2->getSize().x && localPos2.y < texture2->getSize().y) {
+                sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x, localPos2.y);
 
-    auto task = [&](int startRow, int endRow) {
-        for (int y = startRow; y < endRow; ++y) {
-            if (found) {
-                return;
-            }
-
-            for (float x = left; x < right; x += 1) {
-                sf::Vector2f globalPos(x, y + top);
-                sf::Vector2i localPos1 = sf::Vector2i(sprite1.getInverseTransform().transformPoint(globalPos));
-                sf::Vector2i localPos2 = sf::Vector2i(sprite2.getInverseTransform().transformPoint(globalPos));
-
-                if (localPos1.x >= 0 && localPos1.y >= 0 && localPos1.x < texture1->getSize().x && localPos1.y < texture1->getSize().y &&
-                    localPos2.x >= 0 && localPos2.y >= 0 && localPos2.x < texture2->getSize().x && localPos2.y < texture2->getSize().y) {
-                    sf::Color pixelColor1 = texture1->copyToImage().getPixel(localPos1.x, localPos1.y);
-                    sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x, localPos2.y);
-
-                    if (pixelColor1 == targetColor || pixelColor2 == targetColor) {
-                        std::lock_guard<std::mutex> lock(mutex);
-                        found = true;
-                        return;
-                    }
+                if (pixelColor2 == targetColor) {
+                    return true;
                 }
             }
         }
-    };
-
-    for (int i = 0; i < numThreads; ++i) {
-        int startRow = i * rowsPerThread;
-        int endRow = (i == numThreads - 1) ? totalRows : (i + 1) * rowsPerThread;
-        threads.emplace_back(task, startRow, endRow);
     }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    return found;
+    return false;
 }
 
-std::set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor, int numThreads) {
+
+std::set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, const sf::Sprite& sprite2, const sf::Color& targetColor) {
     std::set<CollisionDirection> directions;
     sf::FloatRect bounds1 = sprite1.getGlobalBounds();
     sf::FloatRect bounds2 = sprite2.getGlobalBounds();
@@ -393,72 +368,42 @@ std::set<CollisionDirection> checkCollisionDirection(const sf::Sprite& sprite1, 
         return directions;
     }
 
-    const sf::Texture* texture1 = sprite1.getTexture();
     const sf::Texture* texture2 = sprite2.getTexture();
-    if (!texture1 || !texture2) {
+    if (!texture2) {
         return directions;
     }
 
-    float left = bounds1.left;
-    float top = bounds1.top;
-    float right = bounds1.left + bounds1.width;
-    float bottom = bounds1.top + bounds1.height;
+    sf::IntRect textureRect = sprite2.getTextureRect();
 
-    int totalRows = static_cast<int>(bottom - top);
-    int rowsPerThread = totalRows / numThreads;
+    sf::FloatRect intersectRect = bounds1;
+    intersectRect.intersects(bounds2, intersectRect);
 
-    std::vector<std::thread> threads;
-    std::mutex mutex;
-    bool found = false;
+    for (float x = intersectRect.left; x < intersectRect.left + intersectRect.width; x += 1) {
+        for (float y = intersectRect.top; y < intersectRect.top + intersectRect.height; y += 1) {
+            sf::Vector2f globalPos(x, y);
+            sf::Vector2i localPos2 = static_cast<sf::Vector2i>(sprite2.getInverseTransform().transformPoint(globalPos));
 
-    auto task = [&](int startRow, int endRow) {
-        for (int y = startRow; y < endRow; ++y) {
-            if (found) {
-                return;
-            }
+            if (localPos2.x >= textureRect.left && localPos2.y >= textureRect.top &&
+                localPos2.x < textureRect.left + textureRect.width && localPos2.y < textureRect.top + textureRect.height) {
+                sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x - textureRect.left, localPos2.y - textureRect.top);
 
-            for (float x = left; x < right; x += 1) {
-                sf::Vector2f globalPos(x, y + top);
-                sf::Vector2i localPos1 = sf::Vector2i(sprite1.getInverseTransform().transformPoint(globalPos));
-                sf::Vector2i localPos2 = sf::Vector2i(sprite2.getInverseTransform().transformPoint(globalPos));
-
-                if (localPos1.x >= 0 && localPos1.y >= 0 && localPos1.x < texture1->getSize().x && localPos1.y < texture1->getSize().y &&
-                    localPos2.x >= 0 && localPos2.y >= 0 && localPos2.x < texture2->getSize().x && localPos2.y < texture2->getSize().y) {
-                    sf::Color pixelColor1 = texture1->copyToImage().getPixel(localPos1.x, localPos1.y);
-                    sf::Color pixelColor2 = texture2->copyToImage().getPixel(localPos2.x, localPos2.y);
-
-                    if (pixelColor1 == targetColor || pixelColor2 == targetColor) {
-                        std::lock_guard<std::mutex> lock(mutex);
-                        if (!found) {
-                            if (y + top < bounds1.top + bounds1.height / 2) {
-                                directions.insert(CollisionDirection::Top);
-                            } else {
-                                directions.insert(CollisionDirection::Bottom);
-                            }
-
-                            if (x < bounds1.left + bounds1.width / 2) {
-                                directions.insert(CollisionDirection::Left);
-                            } else {
-                                directions.insert(CollisionDirection::Right);
-                            }
-
-                            found = true;
-                        }
-                        return;
+                if (pixelColor2 == targetColor) {
+                    if (y < bounds1.top + bounds1.height / 2) {
+                        directions.insert(CollisionDirection::Top);
+                    } else {
+                        directions.insert(CollisionDirection::Bottom);
                     }
+
+                    if (x < bounds1.left + bounds1.width / 2) {
+                        directions.insert(CollisionDirection::Left);
+                    } else {
+                        directions.insert(CollisionDirection::Right);
+                    }
+
+                    return directions;
                 }
             }
         }
-    };
-
-    for (int i = 0; i < numThreads; ++i) {
-        int startRow = i * rowsPerThread;
-        int endRow = (i == numThreads - 1) ? totalRows : (i + 1) * rowsPerThread;
-        threads.emplace_back(task, startRow, endRow);
-    }
-
-    for (auto& thread : threads) {
-        thread.join();
     }
 
     return directions;
